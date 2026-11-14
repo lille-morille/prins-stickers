@@ -1,0 +1,689 @@
+{
+ "guide": "Prins prints notes on a 312x216 black and white pixel grid. Origin is top-left.\nStart with draw_poster: it gives the best design for the fewest words. Use the other draw_* tools for details it can't do, then print_note or send_to_friend. draw_batch is the cheapest way to do several steps.\nx,y,w,h default to the whole grid. ink is black, white, invert, or a pattern name (dots:6, gray:30).\nFor a brand logo use draw_logo first. For anything else use draw_svg (path data), draw_image (URL, path, base64) or draw_pixels. Any design is possible.\npreview shows the note. Text auto-sizes to fit its box when size is 0.",
+ "look_guide": "block=loud statement; alarm=urgent, broken, blocked; relief=one calm word; monument=a win, a launch; ransom=playful nag, under 5 words; numeral=countdown, key number; collide=appointment at a time; picture=a thing or creature; engraving=night, quiet, elegant; stage=event, show; post=greeting, thanks, birthday; ticket=meeting, trip: items KEY: VALUE; rain=weather, trend: data, items label it; ridges=a total: big, data; transit=merge, route: items name lines; cover=start of a day; list=several items; quote=sentences, poem",
+ "tools": [
+  {
+   "name": "draw_poster",
+   "description": "Designs a whole note from its meaning: layout, type and shading. Never invent facts.",
+   "input_schema": {
+    "type": "object",
+    "properties": {
+     "look": {
+      "type": "string",
+      "description": "omit to auto-choose. block=loud statement; alarm=urgent, broken, blocked; relief=one calm word; monument=a win, a launch; ransom=playful nag, under 5 words; numeral=countdown, key number; collide=appointment at a time; picture=a thing or creature; engraving=night, quiet, elegant; stage=event, show; post=greeting, thanks, birthday; ticket=meeting, trip: items KEY: VALUE; rain=weather, trend: data, items label it; ridges=a total: big, data; transit=merge, route: items name lines; cover=start of a day; list=several items; quote=sentences, poem"
+     },
+     "say": {
+      "type": "string",
+      "description": "fewest words that carry it, 1-4"
+     },
+     "sub": {
+      "type": "string",
+      "description": "short detail line"
+     },
+     "big": {
+      "type": "string",
+      "description": "number or time to feature"
+     },
+     "pic": {
+      "type": "string",
+      "description": "subject: an emoji, or logo:brand"
+     },
+     "data": {
+      "type": "array",
+      "items": {
+       "type": "number"
+      }
+     },
+     "items": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "qr": {
+      "type": "string"
+     },
+     "seed": {
+      "type": "number"
+     }
+    }
+   },
+   "internal": true
+  },
+  {
+   "name": "compare_looks",
+   "description": "See content in the looks that suit it, as one numbered image. Takes draw_poster's fields, plus n. Changes nothing.",
+   "input_schema": {
+    "type": "object",
+    "properties": {
+     "say": {
+      "type": "string"
+     },
+     "n": {
+      "type": "number"
+     }
+    }
+   },
+   "internal": false
+  },
+  {
+   "name": "draw_batch",
+   "description": "Run many ops in one call. Each op is {op:poster|text|figure|pattern|frame|shape|image|svg|logo|pixels|formula|qr|transform|repeat|scatter|clear, ...same args as its draw_ tool}. repeat: {n,dx,dy,ops}. scatter: {n,seed,x,y,w,h,ops}.",
+   "input_schema": {
+    "type": "object",
+    "properties": {
+     "ops": {
+      "type": "array",
+      "items": {
+       "type": "object"
+      }
+     }
+    },
+    "required": [
+     "ops"
+    ]
+   },
+   "internal": true
+  },
+  {
+   "name": "draw_text",
+   "description": "Text. size 0 fits the box. align l|c|r, valign t|m|b.",
+   "input_schema": {
+    "type": "object",
+    "properties": {
+     "s": {
+      "type": "string"
+     },
+     "font": {
+      "type": "string",
+      "description": "see catalog fonts, default sans-bold"
+     },
+     "size": {
+      "type": "number"
+     },
+     "align": {
+      "type": "string"
+     },
+     "valign": {
+      "type": "string"
+     },
+     "wrap": {
+      "type": "boolean"
+     },
+     "x": {
+      "type": "number"
+     },
+     "y": {
+      "type": "number"
+     },
+     "w": {
+      "type": "number"
+     },
+     "h": {
+      "type": "number"
+     },
+     "ink": {
+      "type": "string"
+     },
+     "rot": {
+      "type": "number"
+     }
+    },
+    "required": [
+     "s"
+    ]
+   },
+   "internal": true
+  },
+  {
+   "name": "draw_figure",
+   "description": "A figure (see catalog figures), or any emoji as name emoji:🎂.",
+   "input_schema": {
+    "type": "object",
+    "properties": {
+     "name": {
+      "type": "string"
+     },
+     "x": {
+      "type": "number"
+     },
+     "y": {
+      "type": "number"
+     },
+     "w": {
+      "type": "number"
+     },
+     "h": {
+      "type": "number"
+     },
+     "ink": {
+      "type": "string"
+     },
+     "rot": {
+      "type": "number"
+     }
+    },
+    "required": [
+     "name"
+    ]
+   },
+   "internal": true
+  },
+  {
+   "name": "draw_pattern",
+   "description": "Fill a box with a pattern (see catalog patterns). name:size sets scale, gray:N a flat tone. shape ellipse for a round fill.",
+   "input_schema": {
+    "type": "object",
+    "properties": {
+     "name": {
+      "type": "string"
+     },
+     "shape": {
+      "type": "string"
+     },
+     "x": {
+      "type": "number"
+     },
+     "y": {
+      "type": "number"
+     },
+     "w": {
+      "type": "number"
+     },
+     "h": {
+      "type": "number"
+     },
+     "ink": {
+      "type": "string"
+     },
+     "rot": {
+      "type": "number"
+     }
+    },
+    "required": [
+     "name"
+    ]
+   },
+   "internal": true
+  },
+  {
+   "name": "draw_frame",
+   "description": "A border (see catalog frames). Any figure name also repeats around the edge.",
+   "input_schema": {
+    "type": "object",
+    "properties": {
+     "name": {
+      "type": "string"
+     },
+     "size": {
+      "type": "number"
+     },
+     "inset": {
+      "type": "number"
+     },
+     "x": {
+      "type": "number"
+     },
+     "y": {
+      "type": "number"
+     },
+     "w": {
+      "type": "number"
+     },
+     "h": {
+      "type": "number"
+     },
+     "ink": {
+      "type": "string"
+     }
+    }
+   },
+   "internal": true
+  },
+  {
+   "name": "draw_shape",
+   "description": "kind: rect, rrect (r), ellipse, line, curve, polygon (pts [[x,y],..]), arc, pie, chord (a0,a1 degrees). fill false for outline, lw line width.",
+   "input_schema": {
+    "type": "object",
+    "properties": {
+     "kind": {
+      "type": "string"
+     },
+     "pts": {
+      "type": "array"
+     },
+     "fill": {
+      "type": "boolean"
+     },
+     "lw": {
+      "type": "number"
+     },
+     "r": {
+      "type": "number"
+     },
+     "a0": {
+      "type": "number"
+     },
+     "a1": {
+      "type": "number"
+     },
+     "x": {
+      "type": "number"
+     },
+     "y": {
+      "type": "number"
+     },
+     "w": {
+      "type": "number"
+     },
+     "h": {
+      "type": "number"
+     },
+     "ink": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "kind"
+    ]
+   },
+   "internal": true
+  },
+  {
+   "name": "draw_logo",
+   "description": "A brand logo by name (spotify, nike...), from Simple Icons.",
+   "input_schema": {
+    "type": "object",
+    "properties": {
+     "name": {
+      "type": "string"
+     },
+     "x": {
+      "type": "number"
+     },
+     "y": {
+      "type": "number"
+     },
+     "w": {
+      "type": "number"
+     },
+     "h": {
+      "type": "number"
+     },
+     "ink": {
+      "type": "string"
+     },
+     "rot": {
+      "type": "number"
+     }
+    },
+    "required": [
+     "name"
+    ]
+   },
+   "internal": true
+  },
+  {
+   "name": "draw_svg",
+   "description": "Any vector. d: SVG path data with vb viewBox (default 0 0 24 24), or svg: full markup, or src: SVG URL or path.",
+   "input_schema": {
+    "type": "object",
+    "properties": {
+     "d": {
+      "type": "string"
+     },
+     "vb": {
+      "type": "string"
+     },
+     "evenodd": {
+      "type": "boolean"
+     },
+     "svg": {
+      "type": "string"
+     },
+     "src": {
+      "type": "string"
+     },
+     "x": {
+      "type": "number"
+     },
+     "y": {
+      "type": "number"
+     },
+     "w": {
+      "type": "number"
+     },
+     "h": {
+      "type": "number"
+     },
+     "ink": {
+      "type": "string"
+     },
+     "rot": {
+      "type": "number"
+     }
+    }
+   },
+   "internal": true
+  },
+  {
+   "name": "draw_image",
+   "description": "Any image, dithered to one bit. src: URL, file path, or base64. fit contain|cover|stretch. dither atkinson|floyd|bayer|halftone|threshold.",
+   "input_schema": {
+    "type": "object",
+    "properties": {
+     "src": {
+      "type": "string"
+     },
+     "fit": {
+      "type": "string"
+     },
+     "dither": {
+      "type": "string"
+     },
+     "threshold": {
+      "type": "number"
+     },
+     "invert": {
+      "type": "boolean"
+     },
+     "x": {
+      "type": "number"
+     },
+     "y": {
+      "type": "number"
+     },
+     "w": {
+      "type": "number"
+     },
+     "h": {
+      "type": "number"
+     },
+     "ink": {
+      "type": "string"
+     },
+     "rot": {
+      "type": "number"
+     }
+    },
+    "required": [
+     "src"
+    ]
+   },
+   "internal": false
+  },
+  {
+   "name": "draw_pixels",
+   "description": "Exact pixels. rows: strings where . is off and anything else on, with scale. Or b64: packed bits (1 = black) with w.",
+   "input_schema": {
+    "type": "object",
+    "properties": {
+     "rows": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "b64": {
+      "type": "string"
+     },
+     "x": {
+      "type": "number"
+     },
+     "y": {
+      "type": "number"
+     },
+     "w": {
+      "type": "number"
+     },
+     "scale": {
+      "type": "number"
+     },
+     "ink": {
+      "type": "string"
+     },
+     "rot": {
+      "type": "number"
+     }
+    }
+   },
+   "internal": true
+  },
+  {
+   "name": "draw_formula",
+   "description": "Per-pixel math: true paints. Vars x,y,u,v(0-1),r,a(polar),W,H. Funcs sin,cos,tan,atan2,sqrt,abs,floor,hypot,min,max,noise,pow. Example: sin(r/6+a*3)>0",
+   "input_schema": {
+    "type": "object",
+    "properties": {
+     "f": {
+      "type": "string"
+     },
+     "x": {
+      "type": "number"
+     },
+     "y": {
+      "type": "number"
+     },
+     "w": {
+      "type": "number"
+     },
+     "h": {
+      "type": "number"
+     },
+     "ink": {
+      "type": "string"
+     },
+     "rot": {
+      "type": "number"
+     }
+    },
+    "required": [
+     "f"
+    ]
+   },
+   "internal": true
+  },
+  {
+   "name": "draw_qr",
+   "description": "A QR code for s.",
+   "input_schema": {
+    "type": "object",
+    "properties": {
+     "s": {
+      "type": "string"
+     },
+     "ecc": {
+      "type": "string",
+      "description": "l|m|q|h"
+     },
+     "x": {
+      "type": "number"
+     },
+     "y": {
+      "type": "number"
+     },
+     "w": {
+      "type": "number"
+     },
+     "h": {
+      "type": "number"
+     },
+     "ink": {
+      "type": "string"
+     },
+     "rot": {
+      "type": "number"
+     }
+    },
+    "required": [
+     "s"
+    ]
+   },
+   "internal": true
+  },
+  {
+   "name": "transform",
+   "description": "Change a region. kind: invert, flip-h, flip-v, rotate (deg), mirror-h, mirror-v, shift (dx,dy), pixelate (size), outline.",
+   "input_schema": {
+    "type": "object",
+    "properties": {
+     "kind": {
+      "type": "string"
+     },
+     "deg": {
+      "type": "number"
+     },
+     "dx": {
+      "type": "number"
+     },
+     "dy": {
+      "type": "number"
+     },
+     "size": {
+      "type": "number"
+     },
+     "x": {
+      "type": "number"
+     },
+     "y": {
+      "type": "number"
+     },
+     "w": {
+      "type": "number"
+     },
+     "h": {
+      "type": "number"
+     }
+    },
+    "required": [
+     "kind"
+    ]
+   },
+   "internal": true
+  },
+  {
+   "name": "catalog",
+   "description": "Names. kind: looks, figures, patterns, frames, fonts, dithers, ops, system_fonts. Omit for most.",
+   "input_schema": {
+    "type": "object",
+    "properties": {
+     "kind": {
+      "type": "string"
+     }
+    }
+   },
+   "internal": true
+  },
+  {
+   "name": "undo",
+   "description": "Undo n steps.",
+   "input_schema": {
+    "type": "object",
+    "properties": {
+     "n": {
+      "type": "number"
+     }
+    }
+   },
+   "internal": true
+  },
+  {
+   "name": "clear",
+   "description": "A blank note.",
+   "input_schema": {
+    "type": "object",
+    "properties": {}
+   },
+   "internal": true
+  },
+  {
+   "name": "preview",
+   "description": "The note as an image.",
+   "input_schema": {
+    "type": "object",
+    "properties": {}
+   },
+   "internal": false
+  },
+  {
+   "name": "save_design",
+   "description": "Save the current note under a name.",
+   "input_schema": {
+    "type": "object",
+    "properties": {
+     "name": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "name"
+    ]
+   },
+   "internal": false
+  },
+  {
+   "name": "load_design",
+   "description": "Draw a saved design.",
+   "input_schema": {
+    "type": "object",
+    "properties": {
+     "name": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "name"
+    ]
+   },
+   "internal": false
+  },
+  {
+   "name": "print_note",
+   "description": "Print the current note on the user's Prins. text makes a plain note. title labels it.",
+   "input_schema": {
+    "type": "object",
+    "properties": {
+     "title": {
+      "type": "string"
+     },
+     "text": {
+      "type": "string"
+     }
+    }
+   },
+   "internal": false
+  },
+  {
+   "name": "list_friends",
+   "description": "Friends, and who accepts notes.",
+   "input_schema": {
+    "type": "object",
+    "properties": {}
+   },
+   "internal": false
+  },
+  {
+   "name": "send_to_friend",
+   "description": "Send the current note to a friend's Prins, which waits for their button. text makes a plain note.",
+   "input_schema": {
+    "type": "object",
+    "properties": {
+     "friend": {
+      "type": "string",
+      "description": "name or id"
+     },
+     "title": {
+      "type": "string"
+     },
+     "text": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "friend"
+    ]
+   },
+   "internal": false
+  }
+ ]
+}
